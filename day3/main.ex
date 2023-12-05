@@ -104,7 +104,6 @@ defmodule Main do
             case char_is_integer(char) do
               true ->
                 {num, len} = get_num(game, line_num, index)
-
                 {l ++ [num], len}
 
               false ->
