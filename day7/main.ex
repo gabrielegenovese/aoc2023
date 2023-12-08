@@ -109,7 +109,6 @@ defmodule Main do
     game
     |> order_by_type()
     |> order_type()
-    |> IO.inspect()
     |> Enum.reduce({0, 1}, fn {_, v}, {ret, i} -> {ret + (v * i), i + 1} end)
   end
 
