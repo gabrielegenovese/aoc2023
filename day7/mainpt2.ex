@@ -7,32 +7,26 @@ defmodule Main do
   # 6 -> One pair (4)
   # 7 -> High card (5)
 
+  def val("A"), do: 13
+  def val("K"), do: 12
+  def val("Q"), do: 11
+  def val("T"), do: 10
+  def val("9"), do: 9
+  def val("8"), do: 8
+  def val("7"), do: 7
+  def val("6"), do: 6
+  def val("5"), do: 5
+  def val("4"), do: 4
+  def val("3"), do: 3
+  def val("2"), do: 2
+  def val("J"), do: 1
+
   def confront([], []) do
     true
   end
 
   def confront([h1 | t1], [h2 | t2]) do
-    map = %{
-      "A" => 13,
-      "K" => 12,
-      "Q" => 11,
-      "T" => 10,
-      "9" => 9,
-      "8" => 8,
-      "7" => 7,
-      "6" => 6,
-      "5" => 5,
-      "4" => 4,
-      "3" => 3,
-      "2" => 2,
-      "J" => 1
-    }
-
-    if h1 == h2 do
-      confront(t1, t2)
-    else
-      Map.get(map, h1) < Map.get(map, h2)
-    end
+    if h1 == h2, do: confront(t1, t2), else: val(h1) < val(h2)
   end
 
   def order_by_value(list) do
@@ -60,25 +54,9 @@ defmodule Main do
   end
 
   def find_highest(hand) do
-    map = %{
-      "A" => 13,
-      "K" => 12,
-      "Q" => 11,
-      "T" => 10,
-      "9" => 9,
-      "8" => 8,
-      "7" => 7,
-      "6" => 6,
-      "5" => 5,
-      "4" => 4,
-      "3" => 3,
-      "2" => 2,
-      "J" => 1
-    }
-
     hand
     |> Enum.sort(fn x1, x2 ->
-      Map.get(map, x1) > Map.get(map, x2)
+      val(x1) > val(x2)
     end)
     |> List.first()
   end
@@ -103,6 +81,18 @@ defmodule Main do
     end)
   end
 
+  def change_with_most_frequent(hand) do
+    change_joker(hand, find_most_freequent(hand))
+    |> get_hand_formatted()
+    |> eval_map()
+  end
+
+  def change_with_highest(hand) do
+    change_joker(hand, find_highest(hand))
+    |> get_hand_formatted()
+    |> eval_map()
+  end
+
   def get_type(hand) do
     map = get_hand_formatted(hand)
     l = map_size(map)
@@ -112,58 +102,29 @@ defmodule Main do
         1
 
       2 ->
-        change_joker(hand, find_highest(hand))
-        |> get_hand_formatted()
-        |> eval_map()
+        change_with_highest(hand)
 
       3 ->
         c = hand |> Enum.count(&(&1 == "J"))
 
         case c do
-          0 ->
-            eval_map(map)
-
-          1 ->
-            change_joker(hand, find_most_freequent(hand))
-            |> get_hand_formatted()
-            |> eval_map()
-
-          2 ->
-            f = find_most_freequent(hand)
-            IO.inspect(f)
-
-            change_joker(hand, find_most_freequent(hand))
-            |> get_hand_formatted()
-            |> eval_map()
-
-          3 ->
-            change_joker(hand, find_highest(hand))
-            |> get_hand_formatted()
-            |> eval_map()
+          0 -> eval_map(map)
+          1 -> change_with_most_frequent(hand)
+          2 -> change_with_most_frequent(hand)
+          3 -> change_with_highest(hand)
         end
 
       4 ->
         c = hand |> Enum.count(&(&1 == "J"))
 
         case c do
-          0 ->
-            eval_map(map)
-
-          1 ->
-            change_joker(hand, find_most_freequent(hand))
-            |> get_hand_formatted()
-            |> eval_map()
-
-          2 ->
-            change_joker(hand, find_highest(hand))
-            |> get_hand_formatted()
-            |> eval_map()
+          0 -> eval_map(map)
+          1 -> change_with_most_frequent(hand)
+          2 -> change_with_highest(hand)
         end
 
       5 ->
-        change_joker(hand, find_highest(hand))
-        |> get_hand_formatted()
-        |> eval_map()
+        change_with_highest(hand)
     end
   end
 
@@ -212,7 +173,6 @@ defmodule Main do
     game
     |> order_by_type()
     |> order_type()
-    |> IO.inspect()
     |> Enum.reduce({0, 1}, fn {_, v}, {ret, i} -> {ret + v * i, i + 1} end)
   end
 
