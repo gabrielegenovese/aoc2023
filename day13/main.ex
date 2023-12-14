@@ -4,8 +4,8 @@ defmodule Main do
 
     Enum.reduce(0..l, true, fn i, acc ->
       if nline - i >= 0 and nline + i + 1 < l do
-        l1 = Enum.at(grid, nline - i)
-        l2 = Enum.at(grid, nline + i + 1)
+        l1 = Enum.at(grid, nline - i, [])
+        l2 = Enum.at(grid, nline + i + 1, [])
         if l1 != l2, do: false, else: acc
       else
         acc
@@ -20,18 +20,14 @@ defmodule Main do
   def get_vertical(grid) do
     len = length(grid)
 
-    Enum.reduce(0..len, {false, 0}, fn at, {found, save} ->
-      if !found and at < len - 1 do
-        l1 = Enum.at(grid, at)
-        l2 = Enum.at(grid, at + 1)
+    Enum.reduce(0..len, -1, fn at, save ->
+      l1 = Enum.at(grid, at, [])
+      l2 = Enum.at(grid, at + 1, nil)
 
-        if l1 == l2 do
-          if is_matching(grid, at), do: {true, at}, else: {found, save}
-        else
-          {found, save}
-        end
+      if l1 == l2 do
+        if is_matching(grid, at), do: at, else: save
       else
-        {found, save}
+        save
       end
     end)
   end
@@ -41,12 +37,12 @@ defmodule Main do
   end
 
   def eval(grid) do
-    {f1, n1} = get_vertical(grid)
-    {f2, n2} = get_horizontal(grid)
+    n1 = get_vertical(grid)
+    n2 = get_horizontal(grid)
 
-    if f1,
+    if n1 != -1,
       do: (n1 + 1) * 100,
-      else: if(f2, do: n2 + 1, else: 0)
+      else: n2 + 1
   end
 
   def get_grids(game) do
